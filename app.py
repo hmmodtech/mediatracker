@@ -6,16 +6,6 @@ from datetime import datetime, timedelta
 
 # إعداد الصفحة
 st.set_page_config(page_title="Media Tracker", layout="wide", initial_sidebar_state="collapsed")
-
-# --- تنسيق CSS نظيف تماماً (بدون صور) ---
-st.markdown("""
-    <style>
-    @import url('https://github.com/hmmodtech/mediatracker/blob/main/ACF%20logo.png');
-    
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #ffffff; }
-    
-    /* منع أي ظهور لأيقونات الصور */
-    img { display: none !important; }
     
     .header-center {
         text-align: center;
