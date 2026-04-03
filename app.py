@@ -5,73 +5,46 @@ import time
 from datetime import datetime, timedelta
 
 # إعداد الصفحة
-st.set_page_config(page_title="ACF Media Tracker", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Media Tracker", layout="wide", initial_sidebar_state="collapsed")
 
-# --- تنسيق CSS نظيف وبدون أي صور ---
+# --- تنسيق CSS نظيف تماماً (بدون صور) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;700&display=swap');
     
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #ffffff; }
     
-    .header-box {
+    /* منع أي ظهور لأيقونات الصور */
+    img { display: none !important; }
+    
+    .header-center {
         text-align: center;
-        padding: 30px 0;
-        border-bottom: 2px solid #eee;
-        margin-bottom: 40px;
+        padding: 20px 0;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 30px;
     }
 
-    .main-title {
-        color: #333;
-        font-size: 3rem;
-        font-weight: bold;
-        margin: 0;
-    }
-
-    .pal-time {
-        color: #888;
-        font-size: 1.1rem;
-        margin-top: 5px;
-    }
+    .main-title { color: #333; font-size: 3rem; font-weight: bold; margin: 0; }
+    .pal-time { color: #888; font-size: 1.1rem; }
 
     .news-card {
         background: white;
         padding: 25px;
-        border-radius: 10px;
-        border-left: 8px solid #005691;
+        border-radius: 8px;
+        border-left: 10px solid #005691;
         margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     
-    .source-tag {
-        color: #005691;
-        font-weight: bold;
-        font-size: 1.4rem;
-        margin-bottom: 10px;
-        text-align: left;
-    }
-    
-    .news-text {
-        font-family: 'Cairo', sans-serif !important;
-        direction: rtl;
-        text-align: right;
-        font-size: 1.3rem;
-        line-height: 1.7;
-        color: #222;
-    }
-    
-    .time-tag {
-        color: #bbb;
-        font-size: 0.85rem;
-        text-align: right;
-        margin-top: 10px;
-    }
+    .source-tag { color: #005691; font-weight: bold; font-size: 1.4rem; margin-bottom: 8px; text-align: left; }
+    .news-text { font-family: 'Cairo', sans-serif !important; direction: rtl; text-align: right; font-size: 1.3rem; line-height: 1.7; color: #222; }
+    .time-tag { color: #bbb; font-size: 0.85rem; text-align: right; margin-top: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- الهيدر النظيف (عنوان ووقت فقط) ---
+# --- الهيدر (نص فقط في منتصف الصفحة) ---
 st.markdown(f"""
-    <div class="header-box">
+    <div class="header-center">
         <div class="main-title">Media Tracker</div>
         <div class="pal-time">
             Palestine Time: {(datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")}
@@ -81,11 +54,11 @@ st.markdown(f"""
 
 # --- القائمة الجانبية ---
 with st.sidebar:
-    st.title("Control Panel")
+    st.title("Settings")
     sound_on = st.toggle("Audio Notifications", value=True)
     search_q = st.text_input("Filter News:", "")
 
-# --- محرك جلب الأخبار ---
+# --- محرك الجلب ---
 CHANNELS = ["mumenjmmeqdad", "hanialshaer", "asmailpress", "rafa0", "hamza20300", "Nuseirat1", "QudsN", "ShehabTelegram", "PalinfoAr", "almayadeen", "hpress", "gazaalanar", "alhodhud", "EabriLive", "nailkhn"]
 KEYWORDS = ["غزة", "رفح", "خانيونس", "جباليا", "الشمال", "الوسطى", "النصيرات", "قصف", "غارة", "استهداف", "شهيد", "اصابة", "اشتباكات", "توغل", "آليات", "كواد كابتر", "طيران", "مدفعي", "نزوح", "مجزرة", "عاجل", "المستشفى", "الاحتلال", "المقاومة", "صواريخ", "صافرات الإنذار", "معبر", "معابر", "كرم ابو سالم", "بوابة", "تنسيقات", "سفر", "كشف مسافرين"]
 
@@ -115,7 +88,7 @@ if sound_on and len(data) > st.session_state.last_count:
     st.markdown('<audio autoplay><source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>', unsafe_allow_html=True)
 st.session_state.last_count = len(data)
 
-# --- عرض البطاقات ---
+# --- عرض التغذية ---
 for item in data:
     st.markdown(f"""
         <div class="news-card">
