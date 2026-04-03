@@ -7,49 +7,47 @@ from datetime import datetime, timedelta
 # إعداد الصفحة
 st.set_page_config(page_title="ACF Media Tracker", layout="wide", initial_sidebar_state="collapsed")
 
-# --- التنسيق البصري الفخم ---
+# --- تنسيق CSS نظيف وبدون أي صور ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;700&display=swap');
     
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #ffffff; }
     
-    .header-container {
+    .header-box {
         text-align: center;
-        padding: 40px 0;
-        background: #ffffff;
-        border-bottom: 5px solid #97be2f;
+        padding: 30px 0;
+        border-bottom: 2px solid #eee;
         margin-bottom: 40px;
     }
 
     .main-title {
-        color: #005691;
-        font-size: 4.2rem;
+        color: #333;
+        font-size: 3rem;
         font-weight: bold;
         margin: 0;
-        letter-spacing: -1px;
     }
 
-    .pal-time-text {
-        color: #666;
-        font-size: 1.3rem;
-        margin-top: 10px;
+    .pal-time {
+        color: #888;
+        font-size: 1.1rem;
+        margin-top: 5px;
     }
 
     .news-card {
         background: white;
-        padding: 30px;
-        border-radius: 15px;
-        border-left: 12px solid #005691;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 8px solid #005691;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     
     .source-tag {
         color: #005691;
         font-weight: bold;
-        font-size: 1.6rem;
-        margin-bottom: 15px;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
         text-align: left;
     }
     
@@ -57,37 +55,35 @@ st.markdown("""
         font-family: 'Cairo', sans-serif !important;
         direction: rtl;
         text-align: right;
-        font-size: 1.4rem;
-        line-height: 1.8;
-        color: #111;
+        font-size: 1.3rem;
+        line-height: 1.7;
+        color: #222;
     }
     
     .time-tag {
-        color: #aaa;
-        font-size: 0.95rem;
+        color: #bbb;
+        font-size: 0.85rem;
         text-align: right;
-        margin-top: 15px;
+        margin-top: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- الهيدر (عنوان فقط بدون صور) ---
+# --- الهيدر النظيف (عنوان ووقت فقط) ---
 st.markdown(f"""
-    <div class="header-container">
-        <h1 class="main-title">Media Tracker</h1>
-        <div class="pal-time-text">
-            📡 Live Field Monitoring | Palestine Time: {(datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d %I:%M %p")}
+    <div class="header-box">
+        <div class="main-title">Media Tracker</div>
+        <div class="pal-time">
+            Palestine Time: {(datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")}
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# --- القائمة الجانبية (Sidebar) ---
+# --- القائمة الجانبية ---
 with st.sidebar:
-    st.title("Settings")
+    st.title("Control Panel")
     sound_on = st.toggle("Audio Notifications", value=True)
-    search_q = st.text_input("🔍 Filter News:", placeholder="Keywords...")
-    st.divider()
-    st.info("System auto-refreshes every 30 seconds.")
+    search_q = st.text_input("Filter News:", "")
 
 # --- محرك جلب الأخبار ---
 CHANNELS = ["mumenjmmeqdad", "hanialshaer", "asmailpress", "rafa0", "hamza20300", "Nuseirat1", "QudsN", "ShehabTelegram", "PalinfoAr", "almayadeen", "hpress", "gazaalanar", "alhodhud", "EabriLive", "nailkhn"]
@@ -119,7 +115,7 @@ if sound_on and len(data) > st.session_state.last_count:
     st.markdown('<audio autoplay><source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>', unsafe_allow_html=True)
 st.session_state.last_count = len(data)
 
-# --- عرض التغذية الإخبارية ---
+# --- عرض البطاقات ---
 for item in data:
     st.markdown(f"""
         <div class="news-card">
