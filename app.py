@@ -10,7 +10,7 @@ st.set_page_config(page_title="Media Tracker", layout="wide", initial_sidebar_st
 # --- تنسيق CSS نظيف تماماً (بدون صور) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;700&display=swap');
+    @import url('https://github.com/hmmodtech/mediatracker/blob/main/ACF%20logo.png');
     
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #ffffff; }
     
