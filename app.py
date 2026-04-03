@@ -4,50 +4,51 @@ from bs4 import BeautifulSoup
 import time
 from datetime import datetime, timedelta
 
-# 1. إعداد الصفحة (إلغاء الحالة الجانبية لتقليل العناصر)
+# 1. إعداد الصفحة الأساسي
 st.set_page_config(page_title="Media Tracker", layout="wide")
 
-# 2. أمر "إعدام" لأي صورة أو عمود خفي
+# 2. تنسيق CSS لمنع الصور وتعديل الخطوط (نص فقط)
 st.markdown("""
     <style>
-    /* إخفاء نهائي لأي وسم صورة في الصفحة */
-    img, [data-testid="stImage"] { display: none !important; }
-    
-    /* توحيد الخط والاتجاه */
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; }
     
-    /* تصميم الهيدر في المنتصف بدون أعمدة */
-    .header-box {
-        text-align: center;
-        padding: 30px 0;
-        border-bottom: 2px solid #eee;
-        margin-bottom: 30px;
-        width: 100%;
+    /* منع ظهور أي وسم صورة نهائياً */
+    img, svg, [data-testid="stImage"] { display: none !important; }
+    
+    html, body, [class*="css"] { 
+        font-family: 'Cairo', sans-serif; 
+        direction: rtl; 
+        text-align: right; 
     }
-    .main-title { color: #333; font-size: 3rem; font-weight: bold; }
-
-    /* تصميم البطاقات */
+    
+    .main-title-box {
+        text-align: center;
+        padding: 20px;
+        border-bottom: 4px solid #97be2f;
+        margin-bottom: 30px;
+    }
+    
     .news-card {
-        background-color: white;
+        background-color: #ffffff;
         padding: 20px;
         border-radius: 10px;
         border-right: 8px solid #005691;
         margin-bottom: 15px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .source-name { color: #005691; font-weight: bold; font-size: 1.2rem; }
+    
+    .source-name { color: #005691; font-weight: bold; font-size: 1.3rem; }
     .time-stamp { color: #888; font-size: 0.8rem; float: left; }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. الهيدر (نص فقط ومستحيل يظهر بجانبه أي شيء)
+# 3. الهيدر (نص بسيط في المنتصف)
 st.markdown(f"""
-    <div class="header-box">
-        <div class="main-title">Media Tracker</div>
-        <div style="color: #666;">
-            📡 رصد ميداني مباشر | توقيت فلسطين: {(datetime.utcnow() + timedelta(hours=3)).strftime("%I:%M %p")}
-        </div>
+    <div class="main-title-box">
+        <h1 style="color: #333; margin:0; font-size: 3rem;">Media Tracker</h1>
+        <p style="color: #666; font-size: 1.2rem;">
+            📡 رصد ميداني مباشر | توقيت فلسطين: {(datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")}
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -66,21 +67,33 @@ def fetch_data():
             for m in msgs[-1:]:
                 t = m.get_text().strip()
                 if any(w in t for w in KEYWORDS) and t[:50] not in seen:
-                    results.append({"ch": ch, "txt": t, "tm": (datetime.utcnow() + timedelta(hours=3)).strftime("%I:%M %p")})
+                    results.append({
+                        "ch": ch, 
+                        "txt": t, 
+                        "tm": (datetime.utcnow() + timedelta(hours=3)).strftime("%I:%M %p")
+                    })
                     seen.add(t[:50])
         except: continue
     return results[::-1]
 
-# 5. العرض
+# 5. عرض البيانات
 data = fetch_data()
+
+# تنبيه صوتي بسيط
+if 'old_count' not in st.session_state: st.session_state.old_count = 0
+if len(data) > st.session_state.old_count:
+    st.markdown('<audio autoplay><source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>', unsafe_allow_html=True)
+st.session_state.old_count = len(data)
+
 for item in data:
     st.markdown(f"""
         <div class="news-card">
             <span class="time-stamp">{item['tm']}</span>
             <div class="source-name">@{item['ch']}</div>
-            <p style="margin-top:10px;">{item['txt']}</p>
+            <p style="margin-top:10px; line-height:1.6; font-size:1.1rem;">{item['txt']}</p>
         </div>
         """, unsafe_allow_html=True)
 
+# تحديث تلقائي كل 30 ثانية
 time.sleep(30)
 st.rerun()
