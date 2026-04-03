@@ -4,33 +4,25 @@ from bs4 import BeautifulSoup
 import time
 from datetime import datetime, timedelta
 
-# Page Config - English Layout (Left-to-Right)
+# Page Config
 st.set_page_config(page_title="ACF Media Tracker", layout="wide", initial_sidebar_state="expanded")
 
-# --- Custom CSS for Professional English Layout ---
+# --- Custom CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cairo:wght@400;700&display=swap');
-    
-    /* English UI Fonts */
     .main, .sidebar-content, h1, h2, h3 { font-family: 'Inter', sans-serif; }
-    
-    /* Arabic News Content Font */
     .news-text { font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; font-size: 1.1rem; line-height: 1.6; }
-    
     .news-card {
         background: white;
         padding: 20px;
         border-radius: 12px;
-        border-left: 6px solid #005691; /* Border on the left for English UI */
+        border-left: 6px solid #005691;
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
-    .source-tag { color: #005691; font-weight: bold; font-size: 1.1rem; text-align: left; }
+    .source-tag { color: #005691; font-weight: bold; font-size: 1.1rem; }
     .time-tag { color: #888; font-size: 0.85rem; text-align: right; }
-    
-    /* Header Styling */
-    .header-container { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -43,16 +35,17 @@ with col2:
     pal_time = (datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")
     st.write(f"📡 Live Field Monitoring | **Palestine Time: {pal_time}**")
 
-# --- Sidebar (English UI) ---
+# --- Sidebar (Toggle Switch) ---
 with st.sidebar:
     st.title("⚙️ Control Panel")
-    st.write("Manage your tracking preferences here.")
-    sound_option = st.radio("Notification Sound:", ["Enabled", "Disabled"], index=0)
-    search_query = st.text_input("🔍 Quick Search:", placeholder="Search keywords...")
+    st.write("System Settings")
+    # الـ Toggle عاد من جديد بشكل أنيق
+    sound_enabled = st.toggle("Enable Audio Notifications", value=True)
+    search_query = st.text_input("🔍 Quick Search:", placeholder="Filter news...")
     st.divider()
-    st.info("The tracker auto-refreshes every 30 seconds.")
+    st.info("Auto-refreshing every 30 seconds.")
 
-# --- News Fetching Engine ---
+# --- Fetching Engine ---
 CHANNELS = ["mumenjmmeqdad", "hanialshaer", "asmailpress", "rafa0", "hamza20300", "Nuseirat1", "QudsN", "ShehabTelegram", "PalinfoAr", "almayadeen", "hpress", "gazaalanar", "alhodhud", "EabriLive", "nailkhn"]
 KEYWORDS = ["غزة", "رفح", "خانيونس", "جباليا", "الشمال", "الوسطى", "النصيرات", "قصف", "غارة", "استهداف", "شهيد", "اصابة", "اشتباكات", "توغل", "آليات", "كواد كابتر", "طيران", "مدفعي", "نزوح", "مجزرة", "عاجل", "المستشفى", "الاحتلال", "المقاومة", "صواريخ", "صافرات الإنذار", "معبر", "معابر", "كرم ابو سالم", "بوابة", "تنسيقات", "سفر", "كشف مسافرين"]
 
@@ -76,17 +69,17 @@ data = fetch_data()
 if search_query:
     data = [d for d in data if search_query in d['txt']]
 
-# Audio Notification Logic
+# Audio Logic
 if 'last_count' not in st.session_state: st.session_state.last_count = 0
-if sound_option == "Enabled" and len(data) > st.session_state.last_count:
+if sound_enabled and len(data) > st.session_state.last_count:
     st.markdown('<audio autoplay><source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>', unsafe_allow_html=True)
 st.session_state.last_count = len(data)
 
 st.divider()
 
-# --- News Feed Display ---
+# --- Feed ---
 if not data:
-    st.warning("Scanning sources... No new updates at the moment.")
+    st.warning("No updates found. Please wait...")
 else:
     for item in data:
         st.markdown(f"""
@@ -98,6 +91,5 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
-# Auto-Refresh Script
 time.sleep(30)
 st.rerun()
