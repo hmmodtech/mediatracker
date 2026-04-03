@@ -4,52 +4,100 @@ from bs4 import BeautifulSoup
 import time
 from datetime import datetime, timedelta
 
-# Page Config
-st.set_page_config(page_title="ACF Media Tracker", layout="wide", initial_sidebar_state="expanded")
+# إعدادات الصفحة
+st.set_page_config(page_title="ACF Media Tracker", layout="wide", initial_sidebar_state="collapsed")
 
-# --- Custom CSS ---
+# --- تنسيق CSS لمحاكاة الصورة تماماً ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cairo:wght@400;700&display=swap');
-    .main, .sidebar-content, h1, h2, h3 { font-family: 'Inter', sans-serif; }
-    .news-text { font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; font-size: 1.1rem; line-height: 1.6; }
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;700&display=swap');
+    
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+    
+    /* تنسيق الهيدر الثلاثي */
+    .header-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        margin-bottom: 40px;
+    }
+    
+    .main-title {
+        text-align: center;
+        color: #555;
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    /* تنسيق البطاقات كما في الصورة */
     .news-card {
         background: white;
-        padding: 20px;
-        border-radius: 12px;
-        border-left: 6px solid #005691;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        padding: 30px;
+        border-radius: 15px;
+        border-left: 10px solid #005691;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-    .source-tag { color: #005691; font-weight: bold; font-size: 1.1rem; }
-    .time-tag { color: #888; font-size: 0.85rem; text-align: right; }
+    
+    .source-tag {
+        color: #005691;
+        font-weight: bold;
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+    
+    .news-text {
+        font-family: 'Cairo', sans-serif;
+        direction: rtl;
+        text-align: justify;
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    .time-tag {
+        color: #999;
+        font-size: 0.9rem;
+        text-align: right;
+        margin-top: 15px;
+    }
+
+    hr { border: 0.5px solid #eee; margin: 20px 0; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Header Section ---
-col1, col2 = st.columns([1, 4])
-with col1:
-    st.image("https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Action_Against_Hunger_logo.svg/1200px-Action_Against_Hunger_logo.svg.png", width=180)
-with col2:
-    st.markdown("<h1 style='color:#005691; margin-bottom:0;'>ACF Media Tracker</h1>", unsafe_allow_html=True)
+# --- الهيدر (توزيع الشعارات كما في الصورة) ---
+col_left, col_mid, col_right = st.columns([1, 2, 1])
+
+with col_left:
+    # شعار الرمز (السنبلة والقطرة)
+    st.image("https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Action_Against_Hunger_logo.svg/1200px-Action_Against_Hunger_logo.svg.png", width=250)
+
+with col_mid:
+    st.markdown("<h1 class='main-title'>Media Tracker</h1>", unsafe_allow_html=True)
     pal_time = (datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")
-    st.write(f"📡 Live Field Monitoring | **Palestine Time: {pal_time}**")
+    st.markdown(f"<p style='text-align:center; color:#666; font-size:1.1rem;'>Palestine Time: {pal_time}</p>", unsafe_allow_html=True)
 
-# --- Sidebar (Toggle Switch) ---
+with col_right:
+    # شعار النص (Action Against Hunger)
+    st.image("https://www.actionagainsthunger.org/wp-content/themes/action-against-hunger/assets/img/logo-acf.svg", width=280)
+
+# --- القائمة الجانبية (Sidebar) ---
 with st.sidebar:
-    st.title("⚙️ Control Panel")
-    st.write("System Settings")
-    # الـ Toggle عاد من جديد بشكل أنيق
-    sound_enabled = st.toggle("Enable Audio Notifications", value=True)
-    search_query = st.text_input("🔍 Quick Search:", placeholder="Filter news...")
+    st.title("Settings")
+    sound_on = st.toggle("Audio Notifications", value=True)
+    search_q = st.text_input("Filter News:", placeholder="Keyword...")
     st.divider()
-    st.info("Auto-refreshing every 30 seconds.")
+    st.info("System updates every 30 seconds.")
 
-# --- Fetching Engine ---
+# --- محرك البحث والجلب ---
 CHANNELS = ["mumenjmmeqdad", "hanialshaer", "asmailpress", "rafa0", "hamza20300", "Nuseirat1", "QudsN", "ShehabTelegram", "PalinfoAr", "almayadeen", "hpress", "gazaalanar", "alhodhud", "EabriLive", "nailkhn"]
 KEYWORDS = ["غزة", "رفح", "خانيونس", "جباليا", "الشمال", "الوسطى", "النصيرات", "قصف", "غارة", "استهداف", "شهيد", "اصابة", "اشتباكات", "توغل", "آليات", "كواد كابتر", "طيران", "مدفعي", "نزوح", "مجزرة", "عاجل", "المستشفى", "الاحتلال", "المقاومة", "صواريخ", "صافرات الإنذار", "معبر", "معابر", "كرم ابو سالم", "بوابة", "تنسيقات", "سفر", "كشف مسافرين"]
 
-def fetch_data():
+def get_data():
     results = []
     seen = set()
     for ch in CHANNELS:
@@ -65,31 +113,27 @@ def fetch_data():
         except: continue
     return results[::-1]
 
-data = fetch_data()
-if search_query:
-    data = [d for d in data if search_query in d['txt']]
+data = get_data()
+if search_q:
+    data = [d for d in data if search_q in d['txt']]
 
-# Audio Logic
-if 'last_count' not in st.session_state: st.session_state.last_count = 0
-if sound_enabled and len(data) > st.session_state.last_count:
+# نظام الصوت
+if 'prev_count' not in st.session_state: st.session_state.prev_count = 0
+if sound_on and len(data) > st.session_state.prev_count:
     st.markdown('<audio autoplay><source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>', unsafe_allow_html=True)
-st.session_state.last_count = len(data)
+st.session_state.prev_count = len(data)
 
 st.divider()
 
-# --- Feed ---
-if not data:
-    st.warning("No updates found. Please wait...")
-else:
-    for item in data:
-        st.markdown(f"""
-            <div class="news-card">
-                <div class="source-tag">@{item['ch']}</div>
-                <div class="news-text">{item['txt']}</div>
-                <hr style="margin: 10px 0; border: 0.5px solid #eee;">
-                <div class="time-tag">Captured at: {item['tm']}</div>
-            </div>
-            """, unsafe_allow_html=True)
+# --- عرض التغذية الإخبارية (News Feed) ---
+for item in data:
+    st.markdown(f"""
+        <div class="news-card">
+            <div class="source-tag">@{item['ch']}</div>
+            <div class="news-text">{item['txt']}</div>
+            <div class="time-tag">Captured at: {item['tm']}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 time.sleep(30)
 st.rerun()
