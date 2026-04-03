@@ -34,13 +34,9 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # الهيدر
-col_logo, col_title = st.columns([1, 4])
-with col_logo:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/e/e0/Action_Against_Hunger_logo.svg", width=150)
-with col_title:
-    st.markdown("<h1>Media Tracker</h1>", unsafe_allow_html=True)
-    pal_time = (datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")
-    st.write(f"📡 رصد ميداني مباشر | **توقيت فلسطين: {pal_time}**")
+# ابحث عن قسم الهيدر في كود app.py واستبدله بهذا لضمان ظهور الصورة
+st.image("https://upload.wikimedia.org/wikipedia/commons/e/e0/Action_Against_Hunger_logo.svg", width=250)
+st.markdown("<h1 style='margin-top:-30px;'>Media Tracker</h1>", unsafe_allow_html=True)
 
 # القنوات
 CHANNELS = ["mumenjmmeqdad", "hanialshaer", "asmailpress", "rafa0", "hamza20300", "Nuseirat1", "QudsN", "ShehabTelegram", "PalinfoAr", "almayadeen", "hpress", "gazaalanar", "alhodhud", "EabriLive", "nailkhn"]
