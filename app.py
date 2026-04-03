@@ -4,51 +4,42 @@ from bs4 import BeautifulSoup
 import time
 from datetime import datetime, timedelta
 
-# إعداد الصفحة
-st.set_page_config(page_title="Media Tracker", layout="wide", initial_sidebar_state="collapsed")
+# إعداد الصفحة بنمط عريض
+st.set_page_config(page_title="ACF Media Tracker", layout="wide")
+
+# --- تنسيق CSS بسيط ونظيف ---
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     
-    .header-center {
-        text-align: center;
-        padding: 20px 0;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 30px;
-    }
-
-    .main-title { color: #333; font-size: 3rem; font-weight: bold; margin: 0; }
-    .pal-time { color: #888; font-size: 1.1rem; }
-
+    html, body, [class*="css"] { font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; }
+    
     .news-card {
-        background: white;
-        padding: 25px;
-        border-radius: 8px;
-        border-left: 10px solid #005691;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        border-right: 6px solid #005691;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    
-    .source-tag { color: #005691; font-weight: bold; font-size: 1.4rem; margin-bottom: 8px; text-align: left; }
-    .news-text { font-family: 'Cairo', sans-serif !important; direction: rtl; text-align: right; font-size: 1.3rem; line-height: 1.7; color: #222; }
-    .time-tag { color: #bbb; font-size: 0.85rem; text-align: right; margin-top: 10px; }
+    .source-tag { color: #005691; font-weight: bold; font-size: 1.2rem; }
+    .time-tag { color: #888; font-size: 0.8rem; float: left; }
+    h1 { color: #005691; text-align: center; border-bottom: 2px solid #97be2f; padding-bottom: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- الهيدر (نص فقط في منتصف الصفحة) ---
-st.markdown(f"""
-    <div class="header-center">
-        <div class="main-title">Media Tracker</div>
-        <div class="pal-time">
-            Palestine Time: {(datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+# --- العنوان والوقت ---
+st.markdown("<h1>ACF Media Tracker</h1>", unsafe_allow_html=True)
+pal_time = (datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d | %I:%M %p")
+st.write(f"<p style='text-align:center;'>📡 رصد ميداني مباشر | <b>توقيت فلسطين: {pal_time}</b></p>", unsafe_allow_html=True)
 
-# --- القائمة الجانبية ---
+# --- الإعدادات الجانبية ---
 with st.sidebar:
-    st.title("Settings")
-    sound_on = st.toggle("Audio Notifications", value=True)
-    search_q = st.text_input("Filter News:", "")
+    st.header("⚙️ الإعدادات")
+    sound = st.checkbox("🔔 تفعيل صوت التنبيه", value=True)
+    search = st.text_input("🔍 بحث سريع في النتائج:", "")
 
-# --- محرك الجلب ---
+# --- محرك القنوات ---
 CHANNELS = ["mumenjmmeqdad", "hanialshaer", "asmailpress", "rafa0", "hamza20300", "Nuseirat1", "QudsN", "ShehabTelegram", "PalinfoAr", "almayadeen", "hpress", "gazaalanar", "alhodhud", "EabriLive", "nailkhn"]
 KEYWORDS = ["غزة", "رفح", "خانيونس", "جباليا", "الشمال", "الوسطى", "النصيرات", "قصف", "غارة", "استهداف", "شهيد", "اصابة", "اشتباكات", "توغل", "آليات", "كواد كابتر", "طيران", "مدفعي", "نزوح", "مجزرة", "عاجل", "المستشفى", "الاحتلال", "المقاومة", "صواريخ", "صافرات الإنذار", "معبر", "معابر", "كرم ابو سالم", "بوابة", "تنسيقات", "سفر", "كشف مسافرين"]
 
@@ -68,25 +59,29 @@ def fetch_data():
         except: continue
     return results[::-1]
 
+# جلب البيانات وتطبيق البحث
 data = fetch_data()
-if search_q:
-    data = [d for d in data if search_q in d['txt']]
+if search:
+    data = [d for d in data if search in d['txt']]
 
-# نظام الصوت
-if 'last_count' not in st.session_state: st.session_state.last_count = 0
-if sound_on and len(data) > st.session_state.last_count:
+# نظام الصوت عند وصول خبر جديد
+if 'count' not in st.session_state: st.session_state.count = 0
+if sound and len(data) > st.session_state.count:
     st.markdown('<audio autoplay><source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>', unsafe_allow_html=True)
-st.session_state.last_count = len(data)
+st.session_state.count = len(data)
 
-# --- عرض التغذية ---
+st.divider()
+
+# --- عرض الأخبار ---
 for item in data:
     st.markdown(f"""
         <div class="news-card">
-            <div class="source-tag">@{item['ch']}</div>
-            <div class="news-text">{item['txt']}</div>
-            <div class="time-tag">Captured at: {item['tm']}</div>
+            <span class="time-tag">{item['tm']}</span>
+            <span class="source-tag">@{item['ch']}</span>
+            <p style="margin-top:10px;">{item['txt']}</p>
         </div>
         """, unsafe_allow_html=True)
 
+# تحديث تلقائي كل 30 ثانية
 time.sleep(30)
 st.rerun()
